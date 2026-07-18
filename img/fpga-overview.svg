@@ -1,0 +1,93 @@
+<svg viewBox="0 0 900 620" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5b8ba6"/>
+    </marker>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f1720"/>
+      <stop offset="100%" stop-color="#0a0f16"/>
+    </linearGradient>
+    <linearGradient id="frontend" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1c3a4a"/>
+      <stop offset="100%" stop-color="#16303d"/>
+    </linearGradient>
+    <linearGradient id="backend" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1c2e4a"/>
+      <stop offset="100%" stop-color="#16233d"/>
+    </linearGradient>
+    <linearGradient id="output" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#274a2c"/>
+      <stop offset="100%" stop-color="#1e3a22"/>
+    </linearGradient>
+    <linearGradient id="runtime" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3a2c1c"/>
+      <stop offset="100%" stop-color="#2e2216"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="620" fill="url(#bg)"/>
+
+  <text x="450" y="40" text-anchor="middle" font-size="22" font-weight="700" fill="#e8eef2">fpga-builder System Architecture</text>
+  <text x="450" y="62" text-anchor="middle" font-size="13" fill="#7d97a6">Visual graph editor &#8594; AST compiler &#8594; synthesis-ready Verilog</text>
+
+  <!-- Editor Frontend layer -->
+  <rect x="70" y="95" width="760" height="130" rx="14" fill="url(#frontend)" stroke="#3d7691" stroke-width="1.5"/>
+  <text x="96" y="123" font-size="15" font-weight="700" fill="#8fd4f5">EDITOR FRONTEND</text>
+  <text x="96" y="141" font-size="11.5" fill="#9fb6c2">Dear ImGui + ImGui-Node-Editor &#183; SDL3</text>
+
+  <rect x="96" y="155" width="200" height="52" rx="8" fill="#0e1e27" stroke="#3d7691" stroke-width="1"/>
+  <text x="196" y="177" text-anchor="middle" font-size="12.5" fill="#e8eef2" font-weight="600">Node Graph Canvas</text>
+  <text x="196" y="194" text-anchor="middle" font-size="10.5" fill="#8fa8b5">wires &amp; tunnels</text>
+
+  <rect x="320" y="155" width="200" height="52" rx="8" fill="#0e1e27" stroke="#3d7691" stroke-width="1"/>
+  <text x="420" y="177" text-anchor="middle" font-size="12.5" fill="#e8eef2" font-weight="600">Toolbox</text>
+  <text x="420" y="194" text-anchor="middle" font-size="10.5" fill="#8fa8b5">Bitwise &#183; IO &#183; Memory &#183; Misc &#183; Wiring</text>
+
+  <rect x="544" y="155" width="200" height="52" rx="8" fill="#0e1e27" stroke="#3d7691" stroke-width="1"/>
+  <text x="644" y="177" text-anchor="middle" font-size="12.5" fill="#e8eef2" font-weight="600">Custom Modules</text>
+  <text x="644" y="194" text-anchor="middle" font-size="10.5" fill="#8fa8b5">GUID &#183; pins &#183; bitwidth</text>
+
+  <!-- Arrow: Frontend -> Backend -->
+  <line x1="450" y1="225" x2="450" y2="270" stroke="#5b8ba6" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="466" y="252" font-size="10.5" fill="#7d97a6">graph state</text>
+
+  <!-- Compiler Backend layer -->
+  <rect x="70" y="278" width="760" height="130" rx="14" fill="url(#backend)" stroke="#4a6cbf" stroke-width="1.5"/>
+  <text x="96" y="306" font-size="15" font-weight="700" fill="#9fb3f5">COMPILER BACKEND</text>
+  <text x="96" y="324" font-size="11.5" fill="#9fa8c2">AST visitor pattern &#183; Codegen.cpp / Codegen.h</text>
+
+  <rect x="96" y="338" width="200" height="52" rx="8" fill="#141a2b" stroke="#4a6cbf" stroke-width="1"/>
+  <text x="196" y="360" text-anchor="middle" font-size="12.5" fill="#e8eef2" font-weight="600">Cycle Detection</text>
+  <text x="196" y="377" text-anchor="middle" font-size="10.5" fill="#9aa4c2">blocks unbroken loops</text>
+
+  <rect x="320" y="338" width="200" height="52" rx="8" fill="#141a2b" stroke="#4a6cbf" stroke-width="1"/>
+  <text x="420" y="360" text-anchor="middle" font-size="12.5" fill="#e8eef2" font-weight="600">Constant Folding</text>
+  <text x="420" y="377" text-anchor="middle" font-size="10.5" fill="#9aa4c2">dead-code elimination</text>
+
+  <rect x="544" y="338" width="200" height="52" rx="8" fill="#141a2b" stroke="#4a6cbf" stroke-width="1"/>
+  <text x="644" y="360" text-anchor="middle" font-size="12.5" fill="#e8eef2" font-weight="600">AST Traversal</text>
+  <text x="644" y="377" text-anchor="middle" font-size="10.5" fill="#9aa4c2">graph &#8594; codegen visitor</text>
+
+  <!-- Arrow: Backend -> Output -->
+  <line x1="450" y1="408" x2="450" y2="452" stroke="#5b8ba6" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="480" y="434" font-size="10.5" fill="#7d97a6">emit</text>
+
+  <!-- Verilog Output -->
+  <rect x="325" y="460" width="250" height="56" rx="10" fill="url(#output)" stroke="#4f9e5b" stroke-width="1.5"/>
+  <text x="450" y="484" text-anchor="middle" font-size="14" font-weight="700" fill="#a9e8b0">Synthesis-Ready Verilog</text>
+  <text x="450" y="502" text-anchor="middle" font-size="11" fill="#8fc294">.v output</text>
+
+  <!-- Arrow: Frontend -> Runtime targets (side branch, routed around backend/output) -->
+  <polyline points="120,225 120,244 30,244 30,581 90,581" fill="none" stroke="#a67d3d" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <polyline points="780,225 780,244 870,244 870,581 810,581" fill="none" stroke="#a67d3d" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <text x="450" y="546" text-anchor="middle" font-size="10.5" fill="#a68a5b">shared C++20 core compiles to two runtime targets</text>
+
+  <!-- Runtime targets -->
+  <rect x="90" y="555" width="290" height="52" rx="10" fill="url(#runtime)" stroke="#a67d3d" stroke-width="1.5"/>
+  <text x="235" y="577" text-anchor="middle" font-size="12.5" fill="#f0d9ae" font-weight="600">Native Desktop</text>
+  <text x="235" y="594" text-anchor="middle" font-size="10.5" fill="#c2a877">SDL3 &#183; CMake</text>
+
+  <rect x="520" y="555" width="290" height="52" rx="10" fill="url(#runtime)" stroke="#a67d3d" stroke-width="1.5"/>
+  <text x="665" y="577" text-anchor="middle" font-size="12.5" fill="#f0d9ae" font-weight="600">WebAssembly</text>
+  <text x="665" y="594" text-anchor="middle" font-size="10.5" fill="#c2a877">Emscripten &#183; runs in-browser</text>
+</svg>
