@@ -316,8 +316,9 @@ message: .asciiz "Hello World!" ; Store null-terminated string
 
 ### Snake Game
 
+<div>
 <video controls src="/img/snakegame.mp4" class="w-full rounded-xl" />
-
+</div>
 
 
 ## Technical Achievements
