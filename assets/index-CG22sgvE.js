@@ -314,6 +314,11 @@ message: .asciiz "Hello World!" ; Store null-terminated string
                                 ;  using .asciiz directive
 \`\`\`
 
+### Snake Game
+
+<video controls src="/img/snakegame.mp4" class="w-full rounded-xl" />
+
+
 
 ## Technical Achievements
 
