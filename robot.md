@@ -1,0 +1,90 @@
+# Autonomous ROS2 Robot
+![Robot Cover](./img/robot-cover.png)
+
+
+An autonomous differential-drive ROS2 Humble robot that incorporates LiDAR SLAM, encoder odometry, and Nav2 planning with a conversational voice stack (Riva STT → Llama 3 LLM→ Riva TTS) and an expressive on-screen face. The robot holds spoken conversations, with the LLM replying to your statements and questions. However, if it infers you wish it to perform a known action (navigation, emotion change), it issues a matching system command instead of a spoken reply. Everyday wording is enough, you do not have to use keywords or name the skill.
+
+## System Demonstrations
+### Navigation and Command Demo
+<div>
+<video controls src="./img/robot_kitchen.mp4" class="w-full rounded-xl" />
+<div class="llm-only">
+**What this recording shows:** End-to-end voice-to-motion on the physical robot. Spoken "go do the dishes" is understood and refused ("I can't do that yet"), which is the model reasoning about capability, not a keyword miss. Spoken "can you go to the kitchen" is accepted ("on my way"). Nav2 produces a path on the dashboard and the robot drives into the actual kitchen, avoiding obstacles. NVIDIA Riva handles speech; Llama 3 maps language to a navigation goal; ROS2 Humble executes it.
+</div>
+
+</div>
+
+Spoken “go do the dishes” is understood, then refused: the robot has no action for chores. “Go to the kitchen” matches a known navigation skill. Kitchen is a stored pose on a map built earlier. Nav2’s global planner produces a path to those coordinates, and the local planner follows it while steering around obstacles. Riva transcribes the speech, Llama 3 chooses the reply, and a ROS node starts that navigation when the reply is a command.
+
+### Emotion Demo
+<div>
+<video controls src="./img/robot_emotions.mp4" class="w-full rounded-xl" />
+<div class="llm-only">
+**What this recording shows:** Llama 3 driving the robot's face and motion from unconstrained speech, not a canned keyword map. The eyes start sad. "Cheer up" is interpreted and the face switches to happy. A longer natural-language pep talk ("I'm going to ask you to do something and I need you to try your hardest") is parsed into a determined expression. "Navigate to the kitchen" is recognized as a nav goal; the robot moves while keeping that expression. Riva transcribes, Llama 3 selects an action from the robot's skill list (face state and navigation), and ROS2 plus the eye display carry it out.
+</div>
+
+</div>
+
+<p>The robot has an emotion system of different emotional states <code>['NEUTRAL', 'HAPPY', 'SAD', 'SURPRISED', 'INQUISITIVE', 'DETERMINED']</code>, each associated with a distinct on-screen expression. The state is controlled through emotion-state commands issued by Llama 3. There is no keyword recognition, instead Llama 3 is prompted to issue emotion state change commands based on the flow of conversation. In this clip, Llama 3 decided when hearing “I want you to really try your hardest” to initiate a change to the “determined” emotional state.</p>
+
+### SLAM Demo
+
+<div>
+<video controls src="./img/slam.mp4" class="w-full rounded-xl" />
+<div class="llm-only">
+**What this recording shows:** Live SLAM on the robot. RPLiDAR scans feed an occupancy grid that grows as the platform is teleoperated through a real room. Odometry is fused with the laser. RViz shows the occupancy grid filling in during the run, which is the localization-and-mapping loop working on the Jetson, not a prerecorded map dropped onto the screen.
+</div>
+
+</div>
+
+Real-time SLAM mapping demonstration in RViz showing map construction as the robot explores the environment. Controller input visible in bottom left shows manual teleoperation while the robot builds an accurate occupancy grid map using LIDAR data and odometry fusion.
+
+
+## System Architecture
+
+The project integrates five major subsystems:
+
+- **Navigation Stack:** ROS2 Nav2 with LIDAR-based mapping and localization
+- **AI Integration:** Llama3 LLM with voice input/output via NVIDIA Riva
+- **Visual Interface:** Expressive eye display with emotional states
+- **Motor Control:** Dual motor drive system with encoder feedback
+- **Sensor Fusion:** LIDAR and encoder integration for precise positioning
+
+<p>The Jetson Orin Nano runs ROS2 Humble. An RPLiDAR A1 on USB publishes LaserScan into Nav2’s costmaps. Wheel encoders on the ESP32 are converted to odometry so the robot knows how far it has driven. Mapping and going to a named place are separate steps. In the SLAM clip, the robot is teleoperated while LiDAR scans and odometry build an occupancy grid; that grid is saved as a map. Later, a name like kitchen is a stored pose on that already-built map. Nav2 loads the saved map, and the global planner produces a path to those coordinates, which is what happens in the kitchen clip.</p>
+
+<p>Spoken audio is transcribed by NVIDIA Riva, the transcript is sent to Llama 3, and Llama 3’s reply goes to a text-to-speech node. Known-skill intent comes back as XML such as <code>&lt;COMMAND&gt; navigate kitchen &lt;/COMMAND&gt;</code>. If the text received by the TTS node is parsed as a command, TTS initiates the command on the appropriate node (<code>/global_planner</code>, <code>/eyes_node</code>), otherwise text is directly synthesized to speech. Eyes are a browser page on the 7″ HDMI panel.</p>
+
+
+## Hardware Architecture
+
+The complete electronics system can be seen here: 
+![System Architecture Diagram](./img/robot-electronic-diagram.png)
+
+## **ROS2 Node Architecture**
+![Node Diagram](./img/node-diagram.png)
+
+Topics:
+```
+/cmd_vel              # Velocity commands to motors
+/scan                 # LIDAR data
+/odom                 # Odometry feedback
+/voice_in             # Speech-to-text output
+/llama_out            # LLAMA3 output
+/tts_out              # Text-to-speech input
+/robot_state          # Emotional state commands
+/navigation_status    # Current navigation state
+```
+
+<p>The diagram is the map. Voice: STT node, Riva, Llama 3, TTS node, which forks to Nav2 and to the eyes. Nav2 takes LaserScan, a saved map, and encoder odometry. Recovery sits between the planners and the costmaps.</p>
+
+### Real-time Performance:
+
+Motor control loops at 100Hz  
+Navigation updates at 20Hz  
+Voice processing with &lt;750ms latency  
+
+
+---  
+<br>
+
+*Built with: ROS2 Humble, NVIDIA Jetson Orin Nano, RPLiDAR, Llama3, NVIDIA Riva, ESP32*

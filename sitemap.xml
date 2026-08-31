@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://gabrielwest.dev/</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielwest.dev/Gabriel_West_Resume.pdf</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielwest.dev/llms.txt</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielwest.dev/llms-full.txt</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielwest.dev/fpga.html</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielwest.dev/cpu.html</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielwest.dev/engine.html</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielwest.dev/robot.html</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielwest.dev/fpga.md</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielwest.dev/cpu.md</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielwest.dev/engine.md</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://gabrielwest.dev/robot.md</loc><changefreq>weekly</changefreq></url>
+</urlset>

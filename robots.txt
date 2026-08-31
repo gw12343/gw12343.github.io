@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /fpga.html
+Allow: /cpu.html
+Allow: /engine.html
+Allow: /robot.html
+
+Sitemap: https://gabrielwest.dev/sitemap.xml

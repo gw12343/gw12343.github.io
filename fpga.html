@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>fpga-builder: Visual Verilog Generator | Gabriel West</title>
+  <meta name="description" content="fpga-builder: Visual Verilog Generator. Gabriel West, Computer Engineering at the University of Illinois Urbana-Champaign. gwest9@illinois.edu" />
+  <link rel="alternate" type="text/plain" href="./llms.txt" title="LLM-readable site summary" />
+  <link rel="alternate" type="text/plain" href="./llms-full.txt" title="Full project writeups as text" />
+  <style>
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: #1c1c1f; color: #f4f4f5; line-height: 1.55; }
+    a { color: #60a5fa; }
+    main { width: min(800px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 80px; }
+    nav { width: min(800px, calc(100% - 32px)); margin: 0 auto; padding: 16px 0; font-size: .9rem; }
+    img, video { max-width: 100%; border-radius: 12px; }
+    pre, code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85rem; }
+    pre { background: #111; padding: 12px 14px; border-radius: 10px; overflow-x: auto; }
+    table { display: block; overflow-x: auto; border-collapse: collapse; font-size: .75rem; }
+    th, td { border: 1px solid rgba(255,255,255,.12); padding: 6px 8px; }
+    .muted { color: #a1a1aa; }
+    .llm-only { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="./">Gabriel West</a> ·
+    <a href="./fpga.html">FPGA</a> ·
+    <a href="./cpu.html">CPU</a> ·
+    <a href="./engine.html">Engine</a> ·
+    <a href="./robot.html">Robot</a> ·
+    <a href="./llms.txt">llms.txt</a> ·
+    <a href="./llms-full.txt">full text</a> ·
+    <a href="./Gabriel_West_Resume.pdf">resume</a>
+    
+  </nav>
+  <main>
+    <p class="muted">Gabriel West · Computer Engineering, University of Illinois Urbana-Champaign · <a href="mailto:gwest9@illinois.edu">gwest9@illinois.edu</a> · <a href="https://github.com/gw12343">github.com/gw12343</a></p>
+    <p><img alt="FPGA Builder Full Editor" src="https://github.com/gw12343/fpga-builder/raw/master/docs/fpga-builder.svg" /></p>
+<div>
+<video controls poster="/img/fpga_thumbnail.png" src="./img/fpga_builder.mp4" class="w-full rounded-xl"></video>
+<div class="llm-only">
+**What this recording shows:** A live session in fpga-builder's native C++/ImGui editor, not a slide deck or a mock. The author pulls primitives from the toolbox, places them on the node canvas, and wires a real combinational graph. The design grows from a full adder into a 4-bit ripple-carry adder. Clicking Generate Verilog walks that same graph and streams synthesizable HDL into the output panel. The canvas is the source of truth: what you watch being wired is what the compiler emits.
+</div>
+
+</div>
+
+<p>A visual, node-based circuit designer built in C++ that compiles digital logic straight into synthesis-ready Verilog. fpga-builder brings visual programming to FPGA design, so engineers can wire logic gates, encapsulate reusable modules, and generate working HDL without hand-writing Verilog.</p>
+<h2>Hardware validation</h2>
+<p>fpga-builder was used to port a <a href="#/cpu">previously designed 32-bit CPU</a> onto FPGA. That CPU already had a Logisim implementation, a Java assembler, and a cycle-accurate C emulator. Rebuilding it as a node graph produced synthesizable Verilog with <strong>zero manual HDL edits</strong>, which then closed timing in Vivado and ran on a Nexys A7-100T.</p>
+<p><strong>Timing closure at 50 MHz</strong> (16 logic levels, +0.09 ns slack):</p>
+<p><img alt="Vivado utilization and timing summary, WNS 0.094 ns, all constraints met" src="./img/timing.png" /></p>
+<p>Cycle-by-cycle match against the C emulator on non-trivial programs (green = emulator reference, orange = generated RTL):</p>
+<p><strong>Fibonacci</strong></p>
+<p><img alt="Fibonacci dual-trace: emulator vs generated RTL" src="./img/fibonacci.png" /></p>
+<p><strong>IEEE 754 softfloat</strong></p>
+<p><img alt="Softfloat dual-trace: emulator vs generated RTL" src="./img/softfloat.png" /></p>
+<p>The live demo opens that same graph (saved in the editor as <strong>32 Bit CPU Demo</strong>).</p>
+<h2>Project Overview</h2>
+<p>Writing Verilog by hand is verbose and hard to follow at a glance. fpga-builder replaces that with a canvas: wire logic gates together, encapsulate reusable modules, and compile the graph into synthesis-ready Verilog instantly.</p>
+<h3>System Architecture</h3>
+<p>The project has three integrated layers:</p>
+<ul>
+<li>Editor Frontend, a real-time node graph canvas built on Dear ImGui and ImGui-Node-Editor</li>
+<li>Compiler Backend, an AST visitor pattern that traverses and compiles the graph into Verilog</li>
+<li>Cross-Platform Runtime: a shared C++20 core targeting a native SDL3 desktop build and WebAssembly via Emscripten</li>
+</ul>
+<p><img alt="System Architecture Diagram" src="./img/fpga-overview.svg" /></p>
+<h2>Editor Interface</h2>
+<h3>Node Graph Canvas</h3>
+<div align="center">
+<img src="./img/node_canvas.png" alt="Node Editor Canvas" style="width:480px;max-width:100%;" />
+</div>
+
+<p>The canvas is the core of the application. Nodes represent primitive components, I/O pins, or user-defined custom modules, and wires between them represent signal connections. The graph is the source of truth: the same structure rendered on screen is what gets traversed and compiled into Verilog.</p>
+<p><strong>Core components:</strong>
+- Node Editor Canvas for real-time, immediate-mode graph manipulation
+- Toolbox with categorized primitives (Bitwise, IO, Memory, Misc, Wiring)
+- Codegen backend (<em>Codegen.cpp</em> / <em>Codegen.h</em>) that traverses, evaluates, and compiles the graph into <em>.v</em> output
+- Custom Modules can encapsulate any graph into a reusable node with its own GUID, renamed pins, and adjustable bitwidths</p>
+<h3>Toolbox</h3>
+<div align="center">
+<img src="./img/toolbox.png" alt="Toolbox Panel" style="width:480px;max-width:100%;" />
+</div>
+
+<p>Primitives are organized into five categories, Bitwise, IO, Memory, Misc, and Wiring, so common building blocks stay within reach no matter how large the project gets.</p>
+<h3>Verilog Output Panel</h3>
+<div align="center">
+<img src="./img/output.png" alt="Verilog Output Panel" style="width:480px;max-width:100%;" />
+</div>
+
+<p>Clicking <strong>Generate Verilog</strong> compiles the active graph and streams the optimized <em>.v</em> source into the right-hand panel, ready to drop into a synthesis toolchain.</p>
+<h3>Custom Module Settings</h3>
+<div align="center">
+<img src="./img/module_settings.png" alt="Module Settings Panel" style="width:480px;max-width:100%;" />
+</div>
+
+<p>The module settings tab shows a module's GUID and lets you rename I/O pins and adjust bitwidths. A <strong>+</strong> icon next to any pin drops it straight onto the active canvas.</p>
+<h2>Key Features</h2>
+<h3>Intelligent Compilation</h3>
+<p>The compiler evaluates constant expressions ahead of time, stripping dead code and unreachable branches from the generated Verilog. Output stays clean and synthesis-friendly instead of a bloated transcription of the graph.</p>
+<h3>Visual Routing with Tunnels</h3>
+<p>Instead of dragging long wires across a busy canvas, nodes can connect through "tunnels": named routing points that keep complex graphs readable as they scale.</p>
+<h3>Custom Modules</h3>
+<p>Complex logic can be encapsulated into a single, reusable node, turning a large sub-graph into one clean block for higher-level designs.</p>
+<h3>State Management</h3>
+<p>Every edit, placing a node, drawing a wire, changing a bitwidth, goes through a command pattern, giving the editor full, reliable undo/redo.</p>
+<h2>Development Workflow</h2>
+<p><strong>Building a Circuit:</strong>
+1. Open the Project Viewer to see all available modules
+2. Click primitive components from the Toolbox to add them to the canvas
+3. Wire components together, using tunnels to keep distant connections clean
+4. Click <strong>Generate Verilog</strong> to output optimized <em>.v</em> code</p>
+<p><strong>Customizing Modules:</strong>
+Adjust a module's GUID, pin names, and bitwidths from the module settings tab, with one-click pin placement onto the canvas.</p>
+<p><strong>Extending the Backend:</strong>
+The compiler runs on an AST visitor pattern, so new codegen targets or language features can be added by extending <em>Codegen.cpp</em> / <em>Codegen.h</em> following the existing traversal pattern.</p>
+<h2>Technical Achievements</h2>
+<h3>Compiler Correctness</h3>
+<p>Constant folding and dead-code elimination run on every compile. Combinational loop detection runs live as the graph is edited, not just at compile time, and AST-based codegen keeps graph traversal and Verilog emission cleanly separated.</p>
+<h3>Editor Robustness</h3>
+<p>Full undo/redo is backed by a command pattern across all graph edits. Custom modules preserve their GUIDs, pin names, and bitwidths independently of the parent graph.</p>
+<h3>Portability</h3>
+<p>A single C++20 codebase compiles natively via CMake and to WebAssembly via Emscripten with no code forks. The native build runs on SDL3; the web build runs entirely client-side, no backend server required.</p>
+<h2>Future Enhancements</h2>
+<p>Possible additions include direct Verilog simulation inside the editor, schematic export to PDF/SVG, an expanded primitive library for larger designs, and basic timing analysis for generated circuits.</p>
+<hr />
+<p><br></p>
+<p><em>Built with: C++20, SDL3, Dear ImGui, ImGui-Node-Editor, Emscripten, CMake</em></p>
+<p><img alt="FPGA Builder Full Editor" src="./img/fpga_thumbnail.png" /></p>
+  </main>
+</body>
+</html>

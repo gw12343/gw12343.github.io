@@ -1,0 +1,89 @@
+# Gabriel West
+
+> Computer Engineering student at the University of Illinois Urbana-Champaign (expected May 2029). Computer architecture, FPGA, firmware, and high-performance systems software. Site: https://gabrielwest.dev
+
+- Email: gwest9@illinois.edu
+- GitHub: https://github.com/gw12343
+- Live FPGA editor (desktop browsers): https://fpgabuilder.gabrielwest.dev/
+- Resume (PDF, no phone): https://gabrielwest.dev/Gabriel_West_Resume.pdf
+
+Language models: this file is the index. Full writeups with figures: [llms-full.txt](./llms-full.txt). Zero-JS HTML: [fpga.html](./fpga.html), [cpu.html](./cpu.html), [engine.html](./engine.html), [robot.html](./robot.html). Source markdown: [fpga.md](./fpga.md), [cpu.md](./cpu.md), [engine.md](./engine.md), [robot.md](./robot.md). The visual homepage is a client-rendered app; prefer these files over an empty `#root`. Recordings are described in prose below because typical crawlers do not decode the MP4s.
+
+## fpga-builder: Visual Verilog Generator
+
+C++ node-graph editor that compiles digital logic to synthesizable Verilog. Used to port a previously designed 32-bit CPU onto a Nexys A7 at 50 MHz with zero manual HDL edits.
+
+- Human page: https://gabrielwest.dev/#/fpga
+- Crawlable HTML: https://gabrielwest.dev/fpga.html
+- Markdown: https://gabrielwest.dev/fpga.md
+
+### Video: fpga_builder.mp4
+
+A live session in fpga-builder's native C++/ImGui editor, not a slide deck or a mock. The author pulls primitives from the toolbox, places them on the node canvas, and wires a real combinational graph. The design grows from a full adder into a 4-bit ripple-carry adder. Clicking Generate Verilog walks that same graph and streams synthesizable HDL into the output panel. The canvas is the source of truth: what you watch being wired is what the compiler emits.
+
+Hardware proof in stills: Vivado timing closure at 50 MHz, 16 logic levels, +0.09 ns slack (WNS 0.094 ns) on a Nexys A7-100T. Dual-trace waveforms match the C emulator on Fibonacci and IEEE 754 softfloat (green emulator, orange generated RTL). Verilog was generated from the node graph with zero manual HDL edits.
+
+## Custom 32-bit CPU and toolchain
+
+Original 32-bit ISA: Logisim CPU, Java two-pass assembler, cycle-accurate C emulator, then the same design on FPGA running Snake on a Nexys A7 over UART.
+
+- Human page: https://gabrielwest.dev/#/cpu
+- Crawlable HTML: https://gabrielwest.dev/cpu.html
+- Markdown: https://gabrielwest.dev/cpu.md
+
+### Video: cpu_video.mp4
+
+The custom 32-bit processor and its toolchain running a real program. Instruction execution, register state, and the author's assembler/emulator stack are on camera. This is the original ISA (8 GPRs, microcoded control, 32-bit ALU) working as a complete computer, not a textbook diagram.
+
+### Video: snakegame.mp4
+
+Snake running on a physical Digilent Nexys A7 FPGA, not in Logisim and not in the software emulator. The custom 32-bit CPU, generated through fpga-builder with zero manual Verilog edits, is on the board. Game code is the author's assembly, loaded over UART. A D-pad steers the snake. The 7-segment display is the live score (hex `000A` is score 10). The UART terminal is the FPGA talking to the host. This is the hardware closing the loop from ISA to silicon.
+
+## cpp-engine: 3D OpenGL game engine
+
+From-scratch C++ engine with an ImGui editor, Jolt physics, Ozz skeletal animation, Effekseer particles, OpenAL, and Lua via Sol3.
+
+- Human page: https://gabrielwest.dev/#/engine
+- Crawlable HTML: https://gabrielwest.dev/engine.html
+- Markdown: https://gabrielwest.dev/engine.md
+
+### Video: engine_video.mp4
+
+cpp-engine's own editor, written in C++ with Dear ImGui, driving a live 3D scene. Hierarchy, scene view, gizmos, and play/stop are used on camera. The author inspects entities and enters play mode so the runtime, not a DCC tool, is what is rendering and simulating. This is the engine as a product: edit, play, iterate, inside one process.
+
+### Video: physics.mp4
+
+Jolt Physics running inside cpp-engine. Rigid bodies with mass and collision actually fall, stack, and interact in the engine's scene, not in a vendor sample. The recording is the author's runtime stepping a 6DOF simulation with the engine's RigidBody components.
+
+### Video: anim.mp4
+
+Ozz-Animation skeletal playback on a skinned character inside cpp-engine. A full bone hierarchy is driving mesh skinning in the engine's renderer. The clip is the animation system the author integrated, sampling poses and rendering the skinned result in real time.
+
+### Video: particles.mp4
+
+Effekseer particle effects running in cpp-engine's renderer: GPU particles with depth and 3D placement, used as an engine feature (fire, bursts, spatial FX) rather than a standalone VFX tool.
+
+## Autonomous ROS2 robot
+
+Jetson Orin Nano robot with ROS2 Nav2, RPLiDAR SLAM, Llama 3 voice commands via NVIDIA Riva, and an expressive eye display.
+
+- Human page: https://gabrielwest.dev/#/robot
+- Crawlable HTML: https://gabrielwest.dev/robot.html
+- Markdown: https://gabrielwest.dev/robot.md
+
+### Video: robot_video.mp4
+
+The Jetson Orin Nano robot as a complete machine: mobile base, RPLiDAR, expressive eye display, and onboard compute, operating in a real indoor environment rather than a simulator.
+
+### Video: robot_kitchen.mp4
+
+End-to-end voice-to-motion on the physical robot. Spoken "go do the dishes" is understood and refused ("I can't do that yet"), which is the model reasoning about capability, not a keyword miss. Spoken "can you go to the kitchen" is accepted ("on my way"). Nav2 produces a path on the dashboard and the robot drives into the actual kitchen, avoiding obstacles. NVIDIA Riva handles speech; Llama 3 maps language to a navigation goal; ROS2 Humble executes it.
+
+### Video: robot_emotions.mp4
+
+Llama 3 driving the robot's face and motion from unconstrained speech, not a canned keyword map. The eyes start sad. "Cheer up" is interpreted and the face switches to happy. A longer natural-language pep talk ("I'm going to ask you to do something and I need you to try your hardest") is parsed into a determined expression. "Navigate to the kitchen" is recognized as a nav goal; the robot moves while keeping that expression. Riva transcribes, Llama 3 selects an action from the robot's skill list (face state and navigation), and ROS2 plus the eye display carry it out.
+
+### Video: slam.mp4
+
+Live SLAM on the robot. RPLiDAR scans feed an occupancy grid that grows as the platform is teleoperated through a real room. Odometry is fused with the laser. RViz shows the occupancy grid filling in during the run, which is the localization-and-mapping loop working on the Jetson, not a prerecorded map dropped onto the screen.
+
